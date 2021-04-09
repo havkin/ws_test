@@ -6,27 +6,7 @@
       check out the
       <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
     </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <button @click="connectWS">connect</button>
   </div>
 </template>
 
@@ -34,7 +14,48 @@
 export default {
   name: 'HelloWorld',
   props: {
-    msg: String
+    msg: String,
+  },
+  data: function() {
+return {
+    socket: WebSocket,
+    data1: {"type":"user_init","data":{"id":"606ef928aa0f3d639c4d66fa"}},
+    data1_1: {"type":"user_init","data":{"id":"606e9129e00a6222bc87a3ee"}},
+    data2: {"type":"room_check","data":{"roomName":"kn8v40n0"}},
+    data2_1: {"type":"room_check","data":{"roomName":"/"}},
+    data3: {"type":"player_data","data":{"liarsToken":"eyJhbGciOiJIUzI1NiJ9.dGVzdEB0ZXN0LnJ1.LrGehCEInbI8iSreI-VdgOpXSOsaDFLm6hBGSVOwf8E","JID":"b689089a","bareJid":"b689089a-a16d-4f90-bdce-4688d322570b@warp.liars.club/ddbb3978-fbd9-4b21-b532-827dc7432f02","avatarLink":"profile_images/ht3zilvfc806xccpqzna","isModerator":false,"name":"tester","room":"kn8v40n0"}}
+  };
+},
+created () {
+    this.$socketClient.onOpen = () => {
+      console.log('socket connected')
+    }
+    // this.$socketClient.onMessage = msg => {
+    //   console.log(JSON.parse(msg.data))
+    // }
+    this.$socketClient.onClose = () => {
+      console.log('socket closed')
+    }
+    this.$socketClient.onError = () => {
+      console.log('socket error')
+    }
+  },
+  methods: {
+    connectWS () {
+      // let data = {
+      //   type: 'push_bot_start',
+      //   data: {}
+      // }
+    this.$socketClient.sendObj(this.data1)
+     this.$socketClient.onMessage = msg => {
+       console.log(JSON.parse(msg.data))
+      const {type} = JSON.parse(msg.data)
+      console.log('🚀 ~ type', type)
+      if (type === "user_initialized") {
+        this.$socketClient.sendObj(this.data2)
+      }
+    }
+    },
   }
 }
 </script>
