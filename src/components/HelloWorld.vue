@@ -50,11 +50,11 @@ export default {
       console.log('socket error');
     };
   },
-  // computed: {
-  //   user() {
-  //     return this.$route.query.user;
-  //   }
-  // },
+  computed: {
+    user() {
+      return this.$route.query.user;
+    }
+  },
   methods: {
     moderatorSetup() {
       this.$socketClient.sendObj(config.moderator.user_init);
