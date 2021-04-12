@@ -2,9 +2,11 @@
   <div class="container">
     <div class="setupSection">
       <h4>Setup</h4>
-      <button @click="moderatorSetup">moderator</button>
-      <button @click="playerSetup">player 1</button>
-      <a href="http://localhost:8080?user=player1" target="_blank">player 1</a>
+      <template v-if="isModerator">
+        <button @click="moderatorSetup">moderator</button>
+        <a href="http://localhost:8080?user=player1" target="_blank" class="toPlayerLink">player 1</a>
+        <a href="http://localhost:8080?user=player2" target="_blank" class="toPlayerLink">player 2</a>
+      </template>
     </div>
     <div class="testSection">
       <h4>Test message</h4>
@@ -13,11 +15,8 @@
       </div>
       <div>
         type
-        <select name="" id="" size="1" class="typeInput">
-          <option value="user_init">user_init</option>
-          <option value="push_bot_start">push_bot_start</option>
-          <option value="push_bot_stop">push_bot_stop</option>
-          <option value="push_bot_pause">push_bot_pause</option>
+        <select name="" id="" size="1" class="typeInput" v-model="msgType">
+          <option v-for="(type, index) in types" :value="type" :key="index">{{type}}</option>
         </select>
       </div>
       <div>
@@ -30,6 +29,7 @@
 
 <script>
 import { config } from '@/setup/config_1.ts';
+import { types } from '@/setup/message_types.ts';
 export default {
   name: 'HelloWorld',
   data() {
@@ -37,11 +37,16 @@ export default {
       socket: null,
       msgType: '',
       msgData: '',
+      types,
     };
   },
   created() {
+    document.title = `ws_test ${this.user}`;
     this.$socketClient.onOpen = () => {
-      console.log('socket connected');
+      console.log('socket connected', this.user);
+      if (!this.isModerator) {
+        this.playerSetup();
+      }
     };
     this.$socketClient.onClose = () => {
       console.log('socket closed');
@@ -49,10 +54,14 @@ export default {
     this.$socketClient.onError = () => {
       console.log('socket error');
     };
+
   },
   computed: {
     user() {
-      return this.$route.query.user;
+      return this.$route.query.user ?? 'moderator';
+    },
+    isModerator() {
+      return this.user === 'moderator';
     }
   },
   methods: {
@@ -72,17 +81,17 @@ export default {
       };
     },
     playerSetup() {
-      this.$socketClient.sendObj(config.player_1.user_init);
+      this.$socketClient.sendObj(config[this.user].user_init);
 
       this.$socketClient.onMessage = msg => {
         console.log(JSON.parse(msg.data));
         const { type } = JSON.parse(msg.data);
         console.log('🚀 ~ type', type);
         if (type === 'user_initialized') {
-          this.$socketClient.sendObj(config.player_1.room_check);
+          this.$socketClient.sendObj(config[this.user].room_check);
         }
         if (type === 'room_check_result') {
-          this.$socketClient.sendObj(config.player_1.player_data);
+          this.$socketClient.sendObj(config[this.user].player_data);
         }
       };
     },
@@ -118,6 +127,9 @@ export default {
 .dataInput {
   width: 300px;
   height: 100px;
+}
+.toPlayerLink {
+  margin-top: 5px;
 }
 button {
   margin: 5px;
