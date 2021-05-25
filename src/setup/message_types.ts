@@ -1,6 +1,5 @@
 export const types = [
-  "user_init",
-  "push_bot_start",
-  "push_bot_stop",
-  "push_bot_pause",
+  "lock_call",
+  "unlock_call",
+  "announcement_create",
 ]

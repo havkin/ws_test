@@ -3,9 +3,15 @@
     <div class="setupSection">
       <h4>Setup</h4>
       <template v-if="isModerator">
-        <button @click="moderatorSetup">moderator</button>
+        <button @click="moderatorSetup">start call</button>
         <a href="http://localhost:8080?user=player1" target="_blank" class="toPlayerLink">player 1</a>
         <a href="http://localhost:8080?user=player2" target="_blank" class="toPlayerLink">player 2</a>
+        <h4>с 1 игроком</h4>
+        <button @click="rolesRandomize">roles randomize</button>
+        <button @click="startGame">start game</button>
+      </template>
+      <template v-else>
+        <!-- <button @click="roleConfirm">role confirm</button> -->
       </template>
     </div>
     <div class="testSection">
@@ -28,8 +34,12 @@
 </template>
 
 <script>
-import { config } from '@/setup/config_1.ts';
+import { config } from '@/setup/config_2.ts';
 import { types } from '@/setup/message_types.ts';
+import roles from '@/setup/roles_randomize.json';
+import roleConfirm from '@/setup/role_confirm.json';
+import startGame from '@/setup/start_game.json';
+
 export default {
   name: 'HelloWorld',
   data() {
@@ -64,18 +74,20 @@ export default {
       return this.user === 'moderator';
     }
   },
+
   methods: {
+    rolesRandomize() {
+      this.$socketClient.sendObj(roles);
+    },
+    startGame() {
+      this.$socketClient.sendObj(startGame);
+    },
     moderatorSetup() {
       this.$socketClient.sendObj(config.moderator.user_init);
 
       this.$socketClient.onMessage = msg => {
-        console.log(JSON.parse(msg.data));
         const { type } = JSON.parse(msg.data);
-        console.log('🚀 ~ type', type);
         if (type === 'user_initialized') {
-          this.$socketClient.sendObj(config.moderator.room_check);
-        }
-        if (type === 'room_check_result') {
           this.$socketClient.sendObj(config.moderator.player_data);
         }
       };
@@ -84,14 +96,12 @@ export default {
       this.$socketClient.sendObj(config[this.user].user_init);
 
       this.$socketClient.onMessage = msg => {
-        console.log(JSON.parse(msg.data));
         const { type } = JSON.parse(msg.data);
-        console.log('🚀 ~ type', type);
         if (type === 'user_initialized') {
-          this.$socketClient.sendObj(config[this.user].room_check);
-        }
-        if (type === 'room_check_result') {
           this.$socketClient.sendObj(config[this.user].player_data);
+        }
+        if (type === 'role_assigned') {
+          this.$socketClient.sendObj(roleConfirm);
         }
       };
     },
