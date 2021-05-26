@@ -35,7 +35,7 @@
 
 <script>
 import { config } from '@/setup/config_2.ts';
-import { types } from '@/setup/message_types.ts';
+import { types, datas } from '@/setup/message_types.ts';
 import roles from '@/setup/roles_randomize.json';
 import roleConfirm from '@/setup/role_confirm.json';
 import startGame from '@/setup/start_game.json';
@@ -108,12 +108,18 @@ export default {
     sendMsg() {
       const msg = {
         type: this.msgType,
-        data: JSON.parse(`{${this.msgData}}`)
+        data: JSON.parse(this.msgData)
       };
       console.log('🚀 ~ msg', msg);
       this.$socketClient.sendObj(msg);
     }
-  }
+  },
+
+  watch: {
+    msgType() {
+      this.msgData = JSON.stringify(datas[this.msgType] || {});
+    }
+  },
 };
 </script>
 
