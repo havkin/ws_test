@@ -7,7 +7,7 @@
         <a href="http://localhost:8080?user=player1" target="_blank" class="toPlayerLink">player 1</a>
         <a href="http://localhost:8080?user=player2" target="_blank" class="toPlayerLink">player 2</a>
         <div v-for="qnt in PLAYERS_QNT" :key="qnt">
-          <h4>игроков: {{qnt}}</h4>
+          <h4>игроков: {{ qnt }}</h4>
           <button @click="rolesRandomize(qnt)">roles randomize</button>
           <button @click="startGame(qnt)">start game</button>
           <hr />
@@ -22,7 +22,7 @@
       <div>
         type
         <select name="" id="" size="1" class="typeInput" v-model="msgType">
-          <option v-for="(type, index) in types" :value="type" :key="index">{{type}}</option>
+          <option v-for="(type, index) in types" :value="type" :key="index">{{ type }}</option>
         </select>
       </div>
       <div>
@@ -35,10 +35,9 @@
 
 <script>
 import { config } from '@/setup/config.ts';
-import { types, datas } from '@/setup/message_types.ts';
-import roleConfirm from '@/setup/role_confirm.json';
 import { roles } from '@/setup/roles_randomize';
 import { startGame } from '@/setup/start_game';
+import { messages } from '@/setup/messages';
 
 export default {
   name: 'HelloWorld',
@@ -47,7 +46,6 @@ export default {
       socket: null,
       msgType: '',
       msgData: '',
-      types,
       PLAYERS_QNT: ['one', 'two'],
     };
   },
@@ -74,7 +72,16 @@ export default {
     },
     isModerator() {
       return this.user === 'moderator';
-    }
+    },
+    types() {
+      const res = [];
+      Object.values(messages).forEach(item => {
+        if (item.isVisible) {
+          res.push(item.type);
+        }
+      });
+      return res;
+    },
   },
 
   methods: {
@@ -103,24 +110,24 @@ export default {
           this.$socketClient.sendObj(config[this.user].player_data);
         }
         if (type === 'role_assigned') {
-          this.$socketClient.sendObj(roleConfirm);
+          this.$socketClient.sendObj(messages.role_confirm);
         }
       };
     },
     sendMsg() {
       const msg = {
         type: this.msgType,
-        data: JSON.parse(this.msgData)
+        data: JSON.parse(this.msgData),
       };
       console.log('🚀 ~ msg', msg);
       this.$socketClient.sendObj(msg);
-    }
+    },
   },
 
   watch: {
     msgType() {
-      this.msgData = JSON.stringify(datas[this.msgType] || {});
-    }
+      this.msgData = JSON.stringify(messages[this.msgType].data || {});
+    },
   },
 };
 </script>
