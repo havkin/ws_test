@@ -9,6 +9,9 @@
         <h4>с 1 игроком</h4>
         <button @click="rolesRandomize">roles randomize</button>
         <button @click="startGame">start game</button>
+        <h4>с 2 игроками</h4>
+        <button @click="rolesRandomize2">roles randomize</button>
+        <button @click="startGame2">start game</button>
       </template>
       <template v-else>
         <!-- <button @click="roleConfirm">role confirm</button> -->
@@ -39,6 +42,8 @@ import { types, datas } from '@/setup/message_types.ts';
 import roles from '@/setup/roles_randomize.json';
 import roleConfirm from '@/setup/role_confirm.json';
 import startGame from '@/setup/start_game.json';
+import { roles2 } from '@/setup/roles_randomize';
+import { startGame2 } from '@/setup/start_game';
 
 export default {
   name: 'HelloWorld',
@@ -81,6 +86,12 @@ export default {
     },
     startGame() {
       this.$socketClient.sendObj(startGame);
+    },
+    rolesRandomize2() {
+      this.$socketClient.sendObj(roles2);
+    },
+    startGame2() {
+      this.$socketClient.sendObj(startGame2);
     },
     moderatorSetup() {
       this.$socketClient.sendObj(config.moderator.user_init);
