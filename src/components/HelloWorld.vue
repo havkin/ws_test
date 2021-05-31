@@ -6,15 +6,12 @@
         <button @click="moderatorSetup">start call</button>
         <a href="http://localhost:8080?user=player1" target="_blank" class="toPlayerLink">player 1</a>
         <a href="http://localhost:8080?user=player2" target="_blank" class="toPlayerLink">player 2</a>
-        <h4>с 1 игроком</h4>
-        <button @click="rolesRandomize">roles randomize</button>
-        <button @click="startGame">start game</button>
-        <h4>с 2 игроками</h4>
-        <button @click="rolesRandomize2">roles randomize</button>
-        <button @click="startGame2">start game</button>
-      </template>
-      <template v-else>
-        <!-- <button @click="roleConfirm">role confirm</button> -->
+        <div v-for="qnt in PLAYERS_QNT" :key="qnt">
+          <h4>игроков: {{qnt}}</h4>
+          <button @click="rolesRandomize(qnt)">roles randomize</button>
+          <button @click="startGame(qnt)">start game</button>
+          <hr />
+        </div>
       </template>
     </div>
     <div class="testSection">
@@ -37,13 +34,11 @@
 </template>
 
 <script>
-import { config } from '@/setup/config_2.ts';
+import { config } from '@/setup/config.ts';
 import { types, datas } from '@/setup/message_types.ts';
-import roles from '@/setup/roles_randomize.json';
 import roleConfirm from '@/setup/role_confirm.json';
-import startGame from '@/setup/start_game.json';
-import { roles2 } from '@/setup/roles_randomize';
-import { startGame2 } from '@/setup/start_game';
+import { roles } from '@/setup/roles_randomize';
+import { startGame } from '@/setup/start_game';
 
 export default {
   name: 'HelloWorld',
@@ -53,8 +48,10 @@ export default {
       msgType: '',
       msgData: '',
       types,
+      PLAYERS_QNT: ['one', 'two'],
     };
   },
+
   created() {
     document.title = `ws_test ${this.user}`;
     this.$socketClient.onOpen = () => {
@@ -69,8 +66,8 @@ export default {
     this.$socketClient.onError = () => {
       console.log('socket error');
     };
-
   },
+
   computed: {
     user() {
       return this.$route.query.user ?? 'moderator';
@@ -81,17 +78,11 @@ export default {
   },
 
   methods: {
-    rolesRandomize() {
-      this.$socketClient.sendObj(roles);
+    startGame(playersQnt) {
+      this.$socketClient.sendObj(startGame[playersQnt]);
     },
-    startGame() {
-      this.$socketClient.sendObj(startGame);
-    },
-    rolesRandomize2() {
-      this.$socketClient.sendObj(roles2);
-    },
-    startGame2() {
-      this.$socketClient.sendObj(startGame2);
+    rolesRandomize(playersQnt) {
+      this.$socketClient.sendObj(roles[playersQnt]);
     },
     moderatorSetup() {
       this.$socketClient.sendObj(config.moderator.user_init);
